@@ -39,6 +39,8 @@ type Defaults struct {
 	ChatEstablishedUserModeTimeDuration time.Duration
 
 	YPEnabled bool
+
+	StreamRelay models.StreamRelay
 }
 
 // GetDefaults will return default configuration values.
@@ -95,5 +97,12 @@ func GetDefaults() Defaults {
 
 		FederationUsername:      "streamer",
 		FederationGoLiveMessage: "I've gone live!",
+		StreamRelay: models.StreamRelay{
+			RtmpUrl:        "rtmp://your.server.com/stream/",
+			RtmpStreamName: "owncast",
+			HlsUrl:         "https://your.server.com/hls/",
+			AuthToken:      "abc123",
+			Enabled:        false,
+		},
 	}
 }

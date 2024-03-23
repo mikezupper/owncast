@@ -71,6 +71,7 @@ func GetServerConfig(w http.ResponseWriter, r *http.Request) {
 			Enabled:     data.GetDirectoryEnabled(),
 			InstanceURL: data.GetServerURL(),
 		},
+		StreamRelay:        data.GetStreamRelayConfig(),
 		S3:                 data.GetS3Config(),
 		ExternalActions:    data.GetExternalActions(),
 		SupportedCodecs:    transcoder.GetCodecs(ffmpeg),
@@ -109,6 +110,7 @@ type serverConfigAdminResponse struct {
 	WebServerIP             string                      `json:"webServerIP"`
 	VideoCodec              string                      `json:"videoCodec"`
 	VideoServingEndpoint    string                      `json:"videoServingEndpoint"`
+	StreamRelay             models.StreamRelay          `json:"streamRelay"`
 	S3                      models.S3                   `json:"s3"`
 	Federation              federationConfigResponse    `json:"federation"`
 	SupportedCodecs         []string                    `json:"supportedCodecs"`

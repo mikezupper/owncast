@@ -309,6 +309,9 @@ func Start() error {
 	// set an array of video output configurations
 	http.HandleFunc("/api/admin/config/video/streamoutputvariants", middleware.RequireAdminAuth(admin.SetStreamOutputVariants))
 
+	// set streamrelay configuration
+	http.HandleFunc("/api/admin/config/streamrelay", middleware.RequireAdminAuth(admin.SetStreamRelayConfiguration))
+
 	// set s3 configuration
 	http.HandleFunc("/api/admin/config/s3", middleware.RequireAdminAuth(admin.SetS3Configuration))
 

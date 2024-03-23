@@ -34,7 +34,7 @@ type Transcoder struct {
 	input                string
 	segmentOutputPath    string
 	variants             []HLSVariant
-
+	streamRelaySettings         models.StreamRelay
 	currentStreamOutputSettings []models.StreamOutputVariant
 	currentLatencyLevel         models.LatencyLevel
 	appendToStream              bool
@@ -171,7 +171,22 @@ func (t *Transcoder) SetIsEvent(isEvent bool) {
 func (t *Transcoder) getString() string {
 	port := t.internalListenerPort
 	localListenerAddress := "http://127.0.0.1:" + port
-
+	
+	// StreamRelay Support
+	if t.segmentIdentifier != "offline" && t.streamRelaySettings.Enabled {
+		ffmpegFlags := []string{
+			fmt.Sprintf(`FFREPORT=file="%s":level=32`, logging.GetTranscoderLogFilePath()),
+			t.ffmpegPath,
+			"-hide_banner",
+			"-loglevel warning",
+			"-i", t.input,
+			"-f", "flv",
+			"-c", "copy",
+			fmt.Sprintf("'%s/%s'", t.streamRelaySettings.RtmpUrl, t.streamRelaySettings.RtmpStreamName),
+		}
+		return strings.Join(ffmpegFlags, " ")
+	} else {
+	// Default system behavior (No StreamRelay)
 	hlsOptionFlags := []string{
 		"program_date_time",
 		"independent_segments",
@@ -232,8 +247,8 @@ func (t *Transcoder) getString() string {
 		"-method PUT",                            // HLS results sent back to us will be over PUTs
 		localListenerAddress + "/%v/stream.m3u8", // Send HLS playlists back to us over HTTP
 	}
-
 	return strings.Join(ffmpegFlags, " ")
+	}
 }
 
 func getVariantFromConfigQuality(quality models.StreamOutputVariant, index int) HLSVariant {
@@ -276,6 +291,15 @@ func NewTranscoder() *Transcoder {
 	ffmpegPath := utils.ValidatedFfmpegPath(data.GetFfMpegPath())
 
 	transcoder := new(Transcoder)
+	
+	//StreamRelay Support
+	if data.GetStreamRelayConfig().Enabled {
+		log.Infof("Stream relay configuration enabled for relay_host: %s", data.GetStreamRelayConfig().RtmpUrl)
+		transcoder.streamRelaySettings = data.GetStreamRelayConfig()
+	} else {
+		log.Infof("Stream relay configuration is disabled")
+	}
+	
 	transcoder.ffmpegPath = ffmpegPath
 	transcoder.internalListenerPort = config.InternalHLSListenerPort
 

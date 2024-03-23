@@ -31,6 +31,13 @@ const initialServerConfigState: ConfigDetails = {
   webServerPort: '',
   socketHostOverride: null,
   videoServingEndpoint: '',
+  streamRelay: {
+    rtmpUrl: 'rtmp://your.server.com/stream/',
+    rtmpStreamName: 'owncast',
+    authToken: 'abc123',
+    hlsUrl: 'http://your.server.com/hls/',
+    enabled: true,
+  },
   s3: {
     accessKey: '',
     acl: '',

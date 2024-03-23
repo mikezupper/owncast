@@ -12,6 +12,7 @@ export const API_CUSTOM_CONTENT = '/pagecontent';
 export const API_CUSTOM_CSS_STYLES = '/customstyles';
 export const API_CUSTOM_JAVASCRIPT = '/customjavascript';
 export const API_S3_INFO = '/s3';
+export const API_STREAM_RELAY_INFO = '/streamrelay';
 export const API_SERVER_OFFLINE_MESSAGE = '/offlinemessage';
 export const API_SOCIAL_HANDLES = '/socialhandles';
 export const API_VIDEO_SEGMENTS = '/video/streamlatencylevel';
@@ -552,6 +553,38 @@ export const S3_TEXT_FIELDS_INFO = {
     fieldName: 'forcePathStyle',
     label: 'Force path-style',
     tip: "If your S3 provider doesn't support virtual-hosted-style URLs set this to ON (i.e. Oracle Cloud Object Storage)",
+  },
+};
+
+
+export const STREAM_RELAY_FIELDS_INFO = {
+  rtmpUrl: {
+    fieldName: 'rtmpUrl',
+    label: 'RTMP Url',
+    maxLength: 255,
+    placeholder: 'rtmp://domain:port/live',
+    tip: '',
+  },
+  rtmpStreamName: {
+    fieldName: 'rtmpStreamName',
+    label: 'RTMP Stream Name',
+    maxLength: 255,
+    placeholder: 'owncast',
+    tip: '',
+  },
+  authToken: {
+    fieldName: 'authToken',
+    label: 'Auth Token',
+    maxLength: 255,
+    placeholder: '',
+    tip: '',
+  },
+  hlsUrl: {
+    fieldName: 'hlsUrl',
+    label: 'HLS Playback Url',
+    maxLength: 255,
+    placeholder: 'https://domain/hls/stream.m3u8',
+    tip: '',
   },
 };
 

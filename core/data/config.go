@@ -39,6 +39,7 @@ const (
 	ffmpegPathKey                   = "ffmpeg_path"
 	nsfwKey                         = "nsfw"
 	s3StorageConfigKey              = "s3_storage_config"
+	streamRelayConfigKey            = "stream_relay_config"
 	videoLatencyLevel               = "video_latency_level"
 	videoStreamOutputVariantsKey    = "video_stream_output_variants"
 	chatDisabledKey                 = "chat_disabled"
@@ -433,6 +434,27 @@ func GetFfMpegPath() string {
 		return ""
 	}
 	return path
+}
+
+// GetStreamRelayConfig will return the StreamRelay configuration.
+func GetStreamRelayConfig() models.StreamRelay {
+	configEntry, err := _datastore.Get(streamRelayConfigKey)
+	if err != nil {
+		return models.StreamRelay{Enabled: false, RtmpUrl: "", RtmpStreamName: "", HlsUrl: "", AuthToken: ""}
+	}
+
+	var streamRelayConfig models.StreamRelay
+	if err := configEntry.getObject(&streamRelayConfig); err != nil {
+		return models.StreamRelay{Enabled: false, RtmpUrl: "", RtmpStreamName: "", HlsUrl: "", AuthToken: ""}
+	}
+
+	return streamRelayConfig
+}
+
+// SetStreamRelayConfig will set the StreamRelay configuration.
+func SetStreamRelayConfig(config models.StreamRelay) error {
+	configEntry := ConfigEntry{Key: streamRelayConfigKey, Value: config}
+	return _datastore.Save(configEntry)
 }
 
 // GetS3Config will return the external storage configuration.
