@@ -55,7 +55,7 @@ func PopulateDefaults() {
 		RtmpStreamName: "owncast",
 		AuthToken:      "abc123",
 		HlsUrl:         "https://your.server.com/hls/",
-		Enabled:        true,
+		Enabled:        false,
 	})
 
 	_ = _datastore.SetBool("HAS_POPULATED_DEFAULTS", true)

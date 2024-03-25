@@ -7,6 +7,7 @@ import StorageConfig from '../../../../components/admin/config/server/StorageCon
 import { ServerStatusContext } from '../../../../utils/server-status-context';
 
 import { AdminLayout } from '../../../../components/layouts/AdminLayout';
+import ConfigStreamRelayInfo from '../../../../components/admin/config/server/StreamRelayConfig';
 
 export default function PublicFacingDetails() {
   const serverStatusData = useContext(ServerStatusContext);
@@ -34,6 +35,11 @@ export default function PublicFacingDetails() {
             label: `S3 Object Storage`,
             key: '3',
             children: <StorageConfig />,
+          },
+          {
+            label: `Stream Relay`,
+            key: '4',
+            children: <ConfigStreamRelayInfo />,
           },
         ]}
       />

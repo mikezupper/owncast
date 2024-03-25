@@ -40,26 +40,26 @@ export default function ConfigVideoSettings() {
           options disable Stream Relay.
         </p>
       ) : (
-      <Row gutter={[45, 16]}>
-        <Col md={24} lg={12}>
-          <div className="form-module variants-table-module">
-            <CurrentVariantsTable />
-          </div>
-        </Col>
-        <Col md={24} lg={12}>
-          <div className="form-module latency-module">
-            <VideoLatency />
-          </div>
+        <Row gutter={[45, 16]}>
+          <Col md={24} lg={12}>
+            <div className="form-module variants-table-module">
+              <CurrentVariantsTable />
+            </div>
+          </Col>
+          <Col md={24} lg={12}>
+            <div className="form-module latency-module">
+              <VideoLatency />
+            </div>
 
-          <Collapse className="advanced-settings codec-module">
-            <Panel header="Advanced Settings" key="1">
-              <div className="form-module variants-table-module">
-                <VideoCodecSelector />
-              </div>
-            </Panel>
-          </Collapse>
-        </Col>
-      </Row>
+            <Collapse className="advanced-settings codec-module">
+              <Panel header="Advanced Settings" key="1">
+                <div className="form-module variants-table-module">
+                  <VideoCodecSelector />
+                </div>
+              </Panel>
+            </Collapse>
+          </Col>
+        </Row>
       )}
     </div>
   );
