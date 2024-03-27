@@ -50,5 +50,7 @@ func PopulateDefaults() {
 		},
 	})
 
+	_ = SetStreamRelayConfig(defaults.StreamRelay)
+
 	_ = _datastore.SetBool("HAS_POPULATED_DEFAULTS", true)
 }

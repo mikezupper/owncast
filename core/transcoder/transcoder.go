@@ -26,15 +26,15 @@ type Transcoder struct {
 
 	stdin *io.PipeReader
 
-	TranscoderCompleted  func(error)
-	playlistOutputPath   string
-	ffmpegPath           string
-	segmentIdentifier    string
-	internalListenerPort string
-	input                string
-	segmentOutputPath    string
-	variants             []HLSVariant
-
+	TranscoderCompleted         func(error)
+	playlistOutputPath          string
+	ffmpegPath                  string
+	segmentIdentifier           string
+	internalListenerPort        string
+	input                       string
+	segmentOutputPath           string
+	variants                    []HLSVariant
+	streamRelaySettings         models.StreamRelay
 	currentStreamOutputSettings []models.StreamOutputVariant
 	currentLatencyLevel         models.LatencyLevel
 	appendToStream              bool
@@ -172,68 +172,83 @@ func (t *Transcoder) getString() string {
 	port := t.internalListenerPort
 	localListenerAddress := "http://127.0.0.1:" + port
 
-	hlsOptionFlags := []string{
-		"program_date_time",
-		"independent_segments",
-	}
-
-	if t.appendToStream {
-		hlsOptionFlags = append(hlsOptionFlags, "append_list")
-	}
-
-	if t.segmentIdentifier == "" {
-		t.segmentIdentifier = shortid.MustGenerate()
-	}
-
-	hlsEventString := ""
-	if t.isEvent {
-		hlsEventString = "-hls_playlist_type event"
+	// StreamRelay Support
+	if t.segmentIdentifier != "offline" && t.streamRelaySettings.Enabled {
+		ffmpegFlags := []string{
+			fmt.Sprintf(`FFREPORT=file="%s":level=32`, logging.GetTranscoderLogFilePath()),
+			t.ffmpegPath,
+			"-hide_banner",
+			"-loglevel warning",
+			"-i", t.input,
+			"-f", "flv",
+			"-c", "copy",
+			fmt.Sprintf("'%s/%s'", t.streamRelaySettings.RtmpUrl, t.streamRelaySettings.RtmpStreamName),
+		}
+		return strings.Join(ffmpegFlags, " ")
 	} else {
-		// Don't let the transcoder close the playlist. We do it manually.
-		hlsOptionFlags = append(hlsOptionFlags, "omit_endlist")
+		// Default system behavior (No StreamRelay)
+		hlsOptionFlags := []string{
+			"program_date_time",
+			"independent_segments",
+		}
+
+		if t.appendToStream {
+			hlsOptionFlags = append(hlsOptionFlags, "append_list")
+		}
+
+		if t.segmentIdentifier == "" {
+			t.segmentIdentifier = shortid.MustGenerate()
+		}
+
+		hlsEventString := ""
+		if t.isEvent {
+			hlsEventString = "-hls_playlist_type event"
+		} else {
+			// Don't let the transcoder close the playlist. We do it manually.
+			hlsOptionFlags = append(hlsOptionFlags, "omit_endlist")
+		}
+
+		hlsOptionsString := ""
+		if len(hlsOptionFlags) > 0 {
+			hlsOptionsString = "-hls_flags " + strings.Join(hlsOptionFlags, "+")
+		}
+		ffmpegFlags := []string{
+			fmt.Sprintf(`FFREPORT=file="%s":level=32`, logging.GetTranscoderLogFilePath()),
+			t.ffmpegPath,
+			"-hide_banner",
+			"-loglevel warning",
+			t.codec.GlobalFlags(),
+			"-fflags +genpts", // Generate presentation time stamp if missing
+			"-flags +cgop",    // Force closed GOPs
+			"-i ", t.input,
+
+			t.getVariantsString(),
+
+			// HLS Output
+			"-f", "hls",
+
+			"-hls_time", strconv.Itoa(t.currentLatencyLevel.SecondsPerSegment), // Length of each segment
+			"-hls_list_size", strconv.Itoa(t.currentLatencyLevel.SegmentCount), // Max # in variant playlist
+			hlsOptionsString,
+			hlsEventString,
+			"-segment_format_options", "mpegts_flags=mpegts_copyts=1",
+
+			// Video settings
+			t.codec.ExtraArguments(),
+			"-pix_fmt", t.codec.PixelFormat(),
+			"-sc_threshold", "0", // Disable scene change detection for creating segments
+
+			// Filenames
+			"-master_pl_name", "stream.m3u8",
+
+			"-hls_segment_filename", localListenerAddress + "/%v/stream-" + t.segmentIdentifier + "-%d.ts", // Send HLS segments back to us over HTTP
+			"-max_muxing_queue_size", "400", // Workaround for Too many packets error: https://trac.ffmpeg.org/ticket/6375?cversion=0
+
+			"-method PUT",                            // HLS results sent back to us will be over PUTs
+			localListenerAddress + "/%v/stream.m3u8", // Send HLS playlists back to us over HTTP
+		}
+		return strings.Join(ffmpegFlags, " ")
 	}
-
-	hlsOptionsString := ""
-	if len(hlsOptionFlags) > 0 {
-		hlsOptionsString = "-hls_flags " + strings.Join(hlsOptionFlags, "+")
-	}
-	ffmpegFlags := []string{
-		fmt.Sprintf(`FFREPORT=file="%s":level=32`, logging.GetTranscoderLogFilePath()),
-		t.ffmpegPath,
-		"-hide_banner",
-		"-loglevel warning",
-		t.codec.GlobalFlags(),
-		"-fflags +genpts", // Generate presentation time stamp if missing
-		"-flags +cgop",    // Force closed GOPs
-		"-i ", t.input,
-
-		t.getVariantsString(),
-
-		// HLS Output
-		"-f", "hls",
-
-		"-hls_time", strconv.Itoa(t.currentLatencyLevel.SecondsPerSegment), // Length of each segment
-		"-hls_list_size", strconv.Itoa(t.currentLatencyLevel.SegmentCount), // Max # in variant playlist
-		hlsOptionsString,
-		hlsEventString,
-		"-segment_format_options", "mpegts_flags=mpegts_copyts=1",
-
-		// Video settings
-		t.codec.ExtraArguments(),
-		"-pix_fmt", t.codec.PixelFormat(),
-		"-sc_threshold", "0", // Disable scene change detection for creating segments
-
-		// Filenames
-		"-master_pl_name", "stream.m3u8",
-
-		"-hls_segment_filename", localListenerAddress + "/%v/stream-" + t.segmentIdentifier + "-%d.ts", // Send HLS segments back to us over HTTP
-		"-max_muxing_queue_size", "400", // Workaround for Too many packets error: https://trac.ffmpeg.org/ticket/6375?cversion=0
-
-		"-method PUT",                            // HLS results sent back to us will be over PUTs
-		localListenerAddress + "/%v/stream.m3u8", // Send HLS playlists back to us over HTTP
-	}
-
-	return strings.Join(ffmpegFlags, " ")
 }
 
 func getVariantFromConfigQuality(quality models.StreamOutputVariant, index int) HLSVariant {
@@ -276,6 +291,15 @@ func NewTranscoder() *Transcoder {
 	ffmpegPath := utils.ValidatedFfmpegPath(data.GetFfMpegPath())
 
 	transcoder := new(Transcoder)
+
+	//StreamRelay Support
+	if data.GetStreamRelayConfig().Enabled {
+		log.Infof("Stream relay configuration enabled for RTMP Host: %s", data.GetStreamRelayConfig().RtmpUrl)
+		transcoder.streamRelaySettings = data.GetStreamRelayConfig()
+	} else {
+		log.Infof("Stream relay configuration is disabled")
+	}
+
 	transcoder.ffmpegPath = ffmpegPath
 	transcoder.internalListenerPort = config.InternalHLSListenerPort
 

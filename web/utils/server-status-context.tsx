@@ -31,6 +31,11 @@ const initialServerConfigState: ConfigDetails = {
   webServerPort: '',
   socketHostOverride: null,
   videoServingEndpoint: '',
+  streamRelay: {
+    rtmpUrl: 'rtmp://your.server.com/stream/',
+    hlsUrl: 'http://your.server.com/hls/',
+    enabled: false,
+  },
   s3: {
     accessKey: '',
     acl: '',

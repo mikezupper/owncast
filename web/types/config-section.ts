@@ -73,6 +73,12 @@ export interface VideoSettingsFields {
   cpuUsageLevel: CpuUsageLevel;
 }
 
+export interface StreamRelayField {
+  rtmpUrl?: string;
+  hlsUrl: string;
+  enabled: boolean;
+}
+
 export interface S3Field {
   acl?: string;
   accessKey: string;
@@ -138,6 +144,7 @@ export interface ConfigDetails {
   ffmpegPath: string;
   instanceDetails: ConfigInstanceDetailsFields;
   rtmpServerPort: string;
+  streamRelay: StreamRelayField;
   s3: S3Field;
   streamKeys: StreamKey[];
   streamKeyOverridden: boolean;

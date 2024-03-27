@@ -528,6 +528,55 @@ func SetS3Configuration(w http.ResponseWriter, r *http.Request) {
 	controllers.WriteSimpleResponse(w, true, "storage configuration changed")
 }
 
+// SetStreamRelayConfiguration will handle the web config request to set the stream relay configuration.
+func SetStreamRelayConfiguration(w http.ResponseWriter, r *http.Request) {
+	if !requirePOST(w, r) {
+		return
+	}
+
+	type streamRelayConfigurationRequest struct {
+		Value models.StreamRelay `json:"value"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var newStreamRelayConfig streamRelayConfigurationRequest
+	if err := decoder.Decode(&newStreamRelayConfig); err != nil {
+		controllers.WriteSimpleResponse(w, false, "unable to update stream relay config with provided values")
+		return
+	}
+
+	if newStreamRelayConfig.Value.Enabled {
+		if newStreamRelayConfig.Value.RtmpUrl == "" || !utils.IsValidURL((newStreamRelayConfig.Value.RtmpUrl)) {
+			controllers.WriteSimpleResponse(w, false, "Stream relay support requires an rtmp Url")
+			return
+		}
+
+		if newStreamRelayConfig.Value.HlsUrl == "" {
+			controllers.WriteSimpleResponse(w, false, "Stream relay support support requires a hls url")
+			return
+		}
+	}
+
+	// config video passthrough on all variants
+	variants := data.GetStreamOutputVariants()
+	updatedVariants := make([]models.StreamOutputVariant, len(variants))
+	for i, variant := range variants {
+		updatedVariant := variant
+		updatedVariant.IsVideoPassthrough = newStreamRelayConfig.Value.Enabled
+		updatedVariants[i] = updatedVariant
+	}
+	if err := data.SetStreamOutputVariants(updatedVariants); err != nil {
+		controllers.WriteSimpleResponse(w, false, fmt.Sprintf("Unable to set stream output variants.  Error: %v", err))
+		return
+	}
+
+	if err := data.SetStreamRelayConfig(newStreamRelayConfig.Value); err != nil {
+		controllers.WriteSimpleResponse(w, false, err.Error())
+		return
+	}
+	controllers.WriteSimpleResponse(w, true, "Stream relay configuration changed")
+}
+
 // SetStreamOutputVariants will handle the web config request to set the video output stream variants.
 func SetStreamOutputVariants(w http.ResponseWriter, r *http.Request) {
 	if !requirePOST(w, r) {

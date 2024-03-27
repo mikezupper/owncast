@@ -7,7 +7,7 @@
 .config-variant-form .description {
   margin-top: 0;
 }
-.config-variant-form .passthrough-warning {
+.config-variant-form .passthrough-warning, .config-video-variants .streamrelay-warning {
   text-align: center;
   padding: 1em;
   color: var(--theme-color-palette-error);
