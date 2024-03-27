@@ -50,13 +50,7 @@ func PopulateDefaults() {
 		},
 	})
 
-	_ = SetStreamRelayConfig(models.StreamRelay{
-		RtmpUrl:        "rtmp://your.server.com/stream/",
-		RtmpStreamName: "owncast",
-		AuthToken:      "abc123",
-		HlsUrl:         "https://your.server.com/hls/",
-		Enabled:        false,
-	})
+	_ = SetStreamRelayConfig(defaults.StreamRelay)
 
 	_ = _datastore.SetBool("HAS_POPULATED_DEFAULTS", true)
 }

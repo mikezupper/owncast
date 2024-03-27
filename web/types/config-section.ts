@@ -75,8 +75,6 @@ export interface VideoSettingsFields {
 
 export interface StreamRelayField {
   rtmpUrl?: string;
-  rtmpStreamName: string;
-  authToken: string;
   hlsUrl: string;
   enabled: boolean;
 }

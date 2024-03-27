@@ -33,10 +33,8 @@ const initialServerConfigState: ConfigDetails = {
   videoServingEndpoint: '',
   streamRelay: {
     rtmpUrl: 'rtmp://your.server.com/stream/',
-    rtmpStreamName: 'owncast',
-    authToken: 'abc123',
     hlsUrl: 'http://your.server.com/hls/',
-    enabled: true,
+    enabled: false,
   },
   s3: {
     accessKey: '',

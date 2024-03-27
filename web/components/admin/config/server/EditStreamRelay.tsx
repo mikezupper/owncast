@@ -26,16 +26,14 @@ import { ToggleSwitch } from '../../ToggleSwitch';
 // we could probably add more detailed checks here
 // `currentValues` is what's currently in the global store and in the db
 function checkSaveable(formValues: any, currentValues: any) {
-  const { rtmpUrl, rtmpStreamName, authToken, hlsUrl, enabled } = formValues;
+  const { rtmpUrl, hlsUrl, enabled } = formValues;
   // if fields are filled out and different from what's in store, then return true
   if (enabled) {
-    if (!!hlsUrl && isValidUrl(hlsUrl) && !!rtmpUrl && !!rtmpStreamName && !!authToken) {
+    if (!!hlsUrl && isValidUrl(hlsUrl) && !!rtmpUrl) {
       if (
         enabled !== currentValues?.enabled ||
         hlsUrl !== currentValues?.hlsUrl ||
-        rtmpUrl !== currentValues?.rtmpUrl ||
-        rtmpStreamName !== currentValues?.rtmpStreamName ||
-        authToken !== currentValues?.authToken
+        rtmpUrl !== currentValues?.rtmpUrl
       ) {
         return true;
       }
@@ -58,14 +56,12 @@ export default function EditStreamRelay() {
   const { setMessage: setAlertMessage } = useContext(AlertMessageContext);
 
   const { streamRelay } = serverConfig;
-  const { rtmpUrl, rtmpStreamName, hlsUrl, authToken, enabled } = streamRelay;
+  const { rtmpUrl, hlsUrl, enabled } = streamRelay;
 
   useEffect(() => {
     setFormDataValues({
       rtmpUrl,
-      rtmpStreamName,
       hlsUrl,
-      authToken,
       enabled,
     });
     setShouldDisplayForm(enabled);
@@ -152,22 +148,8 @@ export default function EditStreamRelay() {
         </div>
         <div className="field-container">
           <TextField
-            {...STREAM_RELAY_FIELDS_INFO.rtmpStreamName}
-            value={formDataValues.rtmpStreamName}
-            onChange={handleFieldChange}
-          />
-        </div>
-        <div className="field-container">
-          <TextField
             {...STREAM_RELAY_FIELDS_INFO.hlsUrl}
             value={formDataValues.hlsUrl}
-            onChange={handleFieldChange}
-          />
-        </div>
-        <div className="field-container">
-          <TextField
-            {...STREAM_RELAY_FIELDS_INFO.authToken}
-            value={formDataValues.authToken}
             onChange={handleFieldChange}
           />
         </div>

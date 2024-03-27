@@ -25,16 +25,16 @@ var (
 	_outputSettings []models.StreamOutputVariant
 )
 
-// StopHLSPuller stops the HLS puller routine
-func StopHLSPuller() {
-	log.Infoln("StopHLSPuller")
+// StopStreamRelay stops the HLS puller routine
+func StopStreamRelay() {
+	log.Debug("StopStreamRelay")
 	if _stop != nil {
 		close(_stop)
 	}
 }
 
-// StartHLSPuller starts the HLS puller routine
-func StartHLSPuller(broadCastOutputSettings []models.StreamOutputVariant) {
+// StartStreamRelay starts the HLS puller routine
+func StartStreamRelay(broadCastOutputSettings []models.StreamOutputVariant) {
 	_outputSettings = broadCastOutputSettings
 	if data.GetStreamRelayConfig().Enabled {
 		_stop = make(chan struct{})
@@ -71,7 +71,7 @@ func getMatchingVariants(manifestVariant models.StreamOutputVariant, hlsVariants
 	var matchingVariants []*m3u8.Variant
 
 	for _, hlsVariant := range hlsVariants {
-		log.Info(fmt.Sprintf("  [getMatchingVariants]  H = %s  W= %s   R = %s", manifestVariant.ScaledWidth, manifestVariant.ScaledHeight, hlsVariant.Resolution))
+		log.Info(fmt.Sprintf("  [getMatchingVariants]  H = %d  W= %d   R = %s", manifestVariant.ScaledWidth, manifestVariant.ScaledHeight, hlsVariant.Resolution))
 		// Compare attributes to determine if they match
 		if fmt.Sprintf("%dx%d", manifestVariant.ScaledWidth, manifestVariant.ScaledHeight) == hlsVariant.Resolution {
 			// Add to matching variants
@@ -86,7 +86,7 @@ func getMatchingVariants(manifestVariant models.StreamOutputVariant, hlsVariants
 func relayHLSPlaylist(playlistURL string, destinationURL string, variantIndex int) {
 	playListContents, err := fetchHLSPlaylist(playlistURL)
 	if err != nil {
-		log.Error(fmt.Sprintf("Unable to retrieve the HLS playlist.  Are you sure the endpoint is running and accessible?  It might take a few seconds for the relay to recieve segments.  Error: %v", err))
+		log.Error(fmt.Sprintf("Unable to retrieve the HLS playlist from %s.  Are you sure the endpoint is running and accessible?  It might take a few seconds for the relay to recieve segments.  Error: %v", playlistURL, err))
 		return
 	}
 
@@ -235,7 +235,7 @@ func updateVariantPaths(playlistVariants []*m3u8.Variant) []*m3u8.Variant {
 
 // returns the index of the variant in the list of variants
 func getMatchingVariantIndex(variant *m3u8.Variant) int {
-	log.Info(fmt.Sprintf(" getMatchingVariantIndex ... current variant: %s", variant))
+	log.Info(fmt.Sprintf(" getMatchingVariantIndex ... current variant: %v", variant))
 	//TODO: add support for stream relay resolution settings....for now just write everything to data/hls/0
 	// if len(data.GetStreamOutputVariants()) != 0 {
 	// 	for index, outputVariant := range data.GetStreamOutputVariants() {

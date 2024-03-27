@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/owncast/owncast/models"
+	"github.com/owncast/owncast/utils"
 )
 
 // Defaults will hold default configuration values.
@@ -45,6 +46,10 @@ type Defaults struct {
 
 // GetDefaults will return default configuration values.
 func GetDefaults() Defaults {
+
+	randomStreamSuffix, _ := utils.GenerateRandomString(10)
+	defaultRtmpStreamName := "owncast-relay-stream-" + randomStreamSuffix
+
 	return Defaults{
 		Name:                 "New Owncast Server",
 		Summary:              "This is a new live video streaming server powered by Owncast.",
@@ -99,9 +104,8 @@ func GetDefaults() Defaults {
 		FederationGoLiveMessage: "I've gone live!",
 		StreamRelay: models.StreamRelay{
 			RtmpUrl:        "rtmp://your.server.com/stream/",
-			RtmpStreamName: "owncast",
+			RtmpStreamName: defaultRtmpStreamName,
 			HlsUrl:         "https://your.server.com/hls/",
-			AuthToken:      "abc123",
 			Enabled:        false,
 		},
 	}

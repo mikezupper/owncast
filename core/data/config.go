@@ -440,20 +440,26 @@ func GetFfMpegPath() string {
 func GetStreamRelayConfig() models.StreamRelay {
 	configEntry, err := _datastore.Get(streamRelayConfigKey)
 	if err != nil {
-		return models.StreamRelay{Enabled: false, RtmpUrl: "", RtmpStreamName: "", HlsUrl: "", AuthToken: ""}
+		return config.GetDefaults().StreamRelay
 	}
 
 	var streamRelayConfig models.StreamRelay
 	if err := configEntry.getObject(&streamRelayConfig); err != nil {
-		return models.StreamRelay{Enabled: false, RtmpUrl: "", RtmpStreamName: "", HlsUrl: "", AuthToken: ""}
+		return config.GetDefaults().StreamRelay
 	}
 
 	return streamRelayConfig
 }
 
 // SetStreamRelayConfig will set the StreamRelay configuration.
-func SetStreamRelayConfig(config models.StreamRelay) error {
-	configEntry := ConfigEntry{Key: streamRelayConfigKey, Value: config}
+func SetStreamRelayConfig(newRelayConfig models.StreamRelay) error {
+	// if config.RtmpStreamName is null, set it to the default value
+	// so as to always have a default in place
+	if newRelayConfig.RtmpStreamName == "" {
+		defaultStreamRelayConfig := config.GetDefaults().StreamRelay
+		newRelayConfig.RtmpStreamName = defaultStreamRelayConfig.RtmpStreamName
+	}
+	configEntry := ConfigEntry{Key: streamRelayConfigKey, Value: newRelayConfig}
 	return _datastore.Save(configEntry)
 }
 

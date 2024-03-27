@@ -69,7 +69,7 @@ func setStreamAsConnected(rtmpOut *io.PipeReader) {
 	}()
 
 	go webhooks.SendStreamStatusEvent(models.StreamStarted)
-	transcoder.StartHLSPuller(_currentBroadcast.OutputSettings)
+	transcoder.StartStreamRelay(_currentBroadcast.OutputSettings)
 	selectedThumbnailVideoQualityIndex, isVideoPassthrough := data.FindHighestVideoQualityIndex(_currentBroadcast.OutputSettings)
 	transcoder.StartThumbnailGenerator(segmentPath, selectedThumbnailVideoQualityIndex, isVideoPassthrough)
 
@@ -103,7 +103,7 @@ func SetStreamAsDisconnected() {
 	}
 
 	transcoder.StopThumbnailGenerator()
-	transcoder.StopHLSPuller()
+	transcoder.StopStreamRelay()
 	rtmp.Disconnect()
 
 	if _yp != nil {

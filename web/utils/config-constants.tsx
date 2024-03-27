@@ -565,20 +565,6 @@ export const STREAM_RELAY_FIELDS_INFO = {
     placeholder: 'rtmp://domain:port/live',
     tip: '',
   },
-  rtmpStreamName: {
-    fieldName: 'rtmpStreamName',
-    label: 'RTMP Stream Name',
-    maxLength: 255,
-    placeholder: 'owncast',
-    tip: '',
-  },
-  authToken: {
-    fieldName: 'authToken',
-    label: 'Auth Token',
-    maxLength: 255,
-    placeholder: '',
-    tip: '',
-  },
   hlsUrl: {
     fieldName: 'hlsUrl',
     label: 'HLS Playback Url',

@@ -551,16 +551,6 @@ func SetStreamRelayConfiguration(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if newStreamRelayConfig.Value.RtmpStreamName == "" {
-			controllers.WriteSimpleResponse(w, false, "Stream relay support requires an rtmp stream name")
-			return
-		}
-
-		// if newStreamRelayConfig.Value.AuthToken == "" {
-		// 	controllers.WriteSimpleResponse(w, false, "Stream relay support requires an auth token")
-		// 	return
-		// }
-
 		if newStreamRelayConfig.Value.HlsUrl == "" {
 			controllers.WriteSimpleResponse(w, false, "Stream relay support support requires a hls url")
 			return
